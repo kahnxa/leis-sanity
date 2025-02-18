@@ -1,12 +1,72 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
+import Image from "next/image";
+import Link from "next/link";
+import MobileMenu from "./MobileMenu"; // Import the mobile menu
 
 function Header() {
   const { user } = useUser();
 
-  console.log(user);
-  return <header>Header</header>;
+  return (
+    <header className="flex flex-col items-center px-6 py-4 bg-white shadow-md w-full">
+      {/* Logo (Always Centered) */}
+      <Image
+        src="/Logo.svg"
+        alt="Logo"
+        width={140}
+        height={70}
+        className="mb-2 md:hidden"
+      />
+
+      {/* Desktop Navigation (Hidden on Mobile) */}
+      <div className="hidden md:flex justify-center items-center w-full">
+        {/* Left Navigation Links */}
+        <nav className="flex items-center gap-6 text-sm font-medium text-black">
+          <Link
+            href="/"
+            className="hover:text-[#27aae1] transition-colors duration-200"
+          >
+            home
+          </Link>
+          <Link
+            href="/rules"
+            className="hover:text-[#27aae1] transition-colors duration-200"
+          >
+            rules
+          </Link>
+        </nav>
+
+        {/* Logo in the Center (Visible on Desktop) */}
+        <Image
+          src="/Logo.svg"
+          alt="Logo"
+          width={140}
+          height={70}
+          className="mx-10 hidden md:block"
+        />
+
+        {/* Right Navigation Links */}
+        <nav className="flex items-center gap-4 text-sm font-medium text-black">
+          <Link
+            href="/shop"
+            className="hover:text-[#27aae1] transition-colors duration-200"
+          >
+            shop
+          </Link>
+          <Link
+            href="/contact"
+            className="hover:text-[#27aae1] transition-colors duration-200"
+          >
+            contact
+          </Link>
+        </nav>
+      </div>
+
+      {/* Mobile Menu (Appears Below Logo) */}
+      <MobileMenu />
+    </header>
+  );
 }
 
 export default Header;

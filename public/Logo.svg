@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 565.5 222">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: #231f20;
+        font-size: 194.1px;
+      }
+
+      .st0, .st1, .st2 {
+        isolation: isolate;
+      }
+
+      .st0, .st2 {
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-weight: 500;
+      }
+
+      .st2 {
+        fill: #fff;
+        font-size: 40.4px;
+      }
+
+      .st3 {
+        fill: #27aae1;
+      }
+    </style>
+  </defs>
+  <g class="st1">
+    <g class="st1">
+      <g class="st1">
+        <text class="st0" transform="translate(-6.7 179.7)"><tspan x="0" y="0">LEIS</tspan></text>
+      </g>
+    </g>
+  </g>
+  <g>
+    <circle class="st3" cx="485.8" cy="111" r="73.1"/>
+    <g class="st1">
+      <g class="st1">
+        <g class="st1">
+          <text class="st2" transform="translate(428.2 124.5)"><tspan x="0" y="0">[u</tspan></text>
+        </g>
+      </g>
+      <g class="st1">
+        <g class="st1">
+          <text class="st2" transform="translate(463.3 124.5)"><tspan x="0" y="0">r</tspan></text>
+        </g>
+      </g>
+      <g class="st1">
+        <g class="st1">
+          <text class="st2" transform="translate(476.7 124.5)"><tspan x="0" y="0">ely]</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
