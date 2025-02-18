@@ -9,7 +9,7 @@ function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="md:hidden flex flex-col items-center w-full">
+    <div className="sm:hidden flex flex-col items-center w-full">
       {/* Hamburger Icon (Below Logo) */}
       <button
         onClick={() => setIsOpen(!isOpen)}
