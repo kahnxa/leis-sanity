@@ -4,6 +4,8 @@ import { useUser } from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "./MobileMenu"; // Import the mobile menu
+import { TrolleyIcon } from "@sanity/icons";
+import { UserIcon } from "@sanity/icons";
 
 function Header() {
   const { user } = useUser();
@@ -61,6 +63,19 @@ function Header() {
             contact
           </Link>
         </nav>
+        {/* Top Right Icons (Trolley and Profile) */}
+        <div className="absolute top-0 right-0 m-8 flex items-center gap-4">
+          <Link href="/profile">
+            <span>
+              <UserIcon className="w-6 h-6" />
+            </span>
+          </Link>
+          <Link href="/cart">
+            <span>
+              <TrolleyIcon className="w-6 h-6" />
+            </span>
+          </Link>
+        </div>
       </div>
 
       {/* Mobile Menu (Appears Below Logo on Small Screens) */}
