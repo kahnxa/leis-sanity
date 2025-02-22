@@ -76,7 +76,7 @@ function Header() {
       />
 
       {/* Top Right Icons */}
-      <div className="hidden sm:flex absolute top-0 right-0 m-8 flex items-center gap-4">
+      <div className="hidden sm:flex absolute top-0 right-0 m-8 items-center gap-4">
         <ClerkLoaded>
           {user ? (
             // User Icon and Dropdown
