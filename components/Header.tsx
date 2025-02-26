@@ -42,7 +42,7 @@ function Header() {
 
         {/* Logo */}
         <Image
-          src="/Logo.svg"
+          src="/lowerCase_logo.svg"
           alt="Logo"
           width={140}
           height={70}
@@ -68,7 +68,7 @@ function Header() {
 
       {/* Mobile Logo */}
       <Image
-        src="/Logo.svg"
+        src="/lowerCase_logo.svg"
         alt="Logo"
         width={140}
         height={70}
