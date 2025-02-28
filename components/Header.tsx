@@ -129,7 +129,7 @@ function Header() {
         <Link href="/cart" className="relative">
           <TrolleyIcon className="w-6 h-6 hover:text-[#27aae1] transition-colors duration-200" />
           {itemCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-[#27aae1] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+            <span className="absolute -top-2 -right-2 bg-[#27aae1] text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full">
               {itemCount}
             </span>
           )}
