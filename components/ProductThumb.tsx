@@ -23,7 +23,7 @@ function ProductThumb({ product }: { product: Product }) {
 
         {isOutOfStock && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <span className="ttext-white font-bold text-lg">Out of Stock</span>
+            <span className="text-white font-bold text-lg">Out of Stock</span>
           </div>
         )}
       </div>
@@ -31,6 +31,19 @@ function ProductThumb({ product }: { product: Product }) {
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {product.name}
         </h2>
+
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+          {product.description
+            ?.map((block) =>
+              block._type === "block"
+                ? block.children?.map((child) => child.text).join("")
+                : ""
+            )
+            .join(" ") || "No description available"}
+        </p>
+        <p className="mt-2 text-lg font-bold text-gray-900">
+          ${product.price?.toFixed(2)}
+        </p>
       </div>
     </Link>
   );

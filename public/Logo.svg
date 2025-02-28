@@ -17,36 +17,42 @@
         font-weight: 500;
       }
 
+      .st3 {
+        fill: #27aae1;
+      }
+
       .st2 {
         fill: #fff;
         font-size: 40.4px;
-      }
-
-      .st3 {
-        fill: #27aae1;
       }
     </style>
   </defs>
   <g class="st1">
     <g class="st1">
       <g class="st1">
-        <text class="st0" transform="translate(-6.7 179.7)"><tspan x="0" y="0">LEIS</tspan></text>
+        <g class="st1">
+          <text class="st0" transform="translate(-6.7 179.7)"><tspan x="0" y="0">LEIS</tspan></text>
+        </g>
       </g>
     </g>
   </g>
-  <g>
-    <circle class="st3" cx="485.8" cy="111" r="73.1"/>
+  <circle class="st3" cx="485.8" cy="111" r="73.1" transform="translate(63.8 376) rotate(-45)"/>
+  <g class="st1">
     <g class="st1">
       <g class="st1">
         <g class="st1">
           <text class="st2" transform="translate(428.2 124.5)"><tspan x="0" y="0">[u</tspan></text>
         </g>
       </g>
+    </g>
+    <g class="st1">
       <g class="st1">
         <g class="st1">
           <text class="st2" transform="translate(463.3 124.5)"><tspan x="0" y="0">r</tspan></text>
         </g>
       </g>
+    </g>
+    <g class="st1">
       <g class="st1">
         <g class="st1">
           <text class="st2" transform="translate(476.7 124.5)"><tspan x="0" y="0">ely]</tspan></text>

@@ -4,7 +4,7 @@
 import "server-only";
 
 import { defineLive } from "next-sanity";
-import { client } from "./client";
+import { client } from "@/sanity/lib/client";
 
 // set your viewer token
 const token = process.env.SANITY_API_READ_TOKEN;
