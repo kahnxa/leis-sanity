@@ -6,9 +6,13 @@ import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
 import { PackageIcon, TrolleyIcon, UserIcon } from "@sanity/icons";
+import useBasketStore from "@/store/store";
 
 function Header() {
   const { user } = useUser();
+  const itemCount = useBasketStore((state) =>
+    state.items.reduce((total, item) => total + item.quantity, 0)
+  );
   const { signOut } = useClerk();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -121,11 +125,14 @@ function Header() {
           )}
         </ClerkLoaded>
 
-        {/* Trolley Icon */}
-        <Link href="/cart">
-          <span>
-            <TrolleyIcon className="w-6 h-6 hover:text-[#27aae1] transition-colors duration-200" />
-          </span>
+        {/* Trolley Icon with Item Count Badge */}
+        <Link href="/cart" className="relative">
+          <TrolleyIcon className="w-6 h-6 hover:text-[#27aae1] transition-colors duration-200" />
+          {itemCount > 0 && (
+            <span className="absolute -top-2 -right-2 bg-[#27aae1] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+              {itemCount}
+            </span>
+          )}
         </Link>
       </div>
 

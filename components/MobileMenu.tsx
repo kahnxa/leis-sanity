@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import Image from "next/image";
+import useBasketStore from "@/store/store";
 import { TrolleyIcon, UserIcon } from "@sanity/icons";
 import { ClerkLoaded, SignInButton, useClerk, useUser } from "@clerk/nextjs";
 
@@ -20,7 +20,9 @@ function MobileMenu() {
     "w-full py-1 px-2 text-xs text-center text-black hover:text-[#27aae1] transition-colors duration-200";
   const emailDisplayClasses =
     "w-full py-1 px-2 text-xs text-center text-black cursor-default";
-
+  const itemCount = useBasketStore((state) =>
+    state.items.reduce((total, item) => total + item.quantity, 0)
+  );
   return (
     <div className="sm:hidden flex flex-col items-center w-full">
       {/* Hamburger Icon (Below Logo) */}
@@ -99,11 +101,14 @@ function MobileMenu() {
             )}
           </ClerkLoaded>
 
-          {/* Trolley Icon */}
-          <Link href="/cart">
-            <span>
-              <TrolleyIcon className="w-6 h-6 hover:text-[#27aae1] transition-colors duration-200" />
-            </span>
+          {/* Trolley Icon for Mobile Menu with Item Count Badge */}
+          <Link href="/cart" className="relative">
+            <TrolleyIcon className="w-6 h-6 hover:text-[#27aae1] transition-colors duration-200" />
+            {itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#27aae1] text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                {itemCount}
+              </span>
+            )}
           </Link>
         </nav>
       )}
