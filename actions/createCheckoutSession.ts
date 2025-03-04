@@ -1,7 +1,7 @@
 "use server";
 
 import { imageUrl } from "@/lib/imageUrl";
-import initializeStripe from "@/lib/stripe"; // Import the function to initialize Stripe
+import initializeStripe from "@/lib/stripe";
 import { BasketItem } from "@/store/store";
 
 export type Metadata = {
@@ -21,35 +21,36 @@ export async function createCheckoutSession(
   metadata: Metadata
 ) {
   try {
-    // Check if any grouped items don't have a price
     const itemsWithoutPrice = items.filter((item) => !item.product.price);
     if (itemsWithoutPrice.length > 0) {
       throw new Error("Some items do not have a price");
     }
 
-    // Initialize Stripe instance
-    const stripe = initializeStripe(); // Use the helper function to get the Stripe instance
+    const stripe = initializeStripe();
 
-    // Search for existing customer by email
-    const customers = await stripe.customers.list({
+    const existingCustomers = await stripe.customers.list({
       email: metadata.customerEmail,
       limit: 1,
     });
 
-    let customerId: string | undefined;
-    if (customers.data.length > 0) {
-      customerId = customers.data[0].id;
-    }
+    const customerId = existingCustomers.data[0]?.id;
+
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : process.env.NEXT_PUBLIC_BASE_URL;
+
+    const successUrl = `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`;
+    const cancelUrl = `${baseUrl}/basket`;
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_creation: customerId ? undefined : "always",
-      customer_email: !customerId ? metadata.customerEmail : undefined,
+      customer_email: customerId ? undefined : metadata.customerEmail,
       metadata,
       mode: "payment",
       allow_promotion_codes: true,
-      success_url: `${`https://${process.env.VERRCEL_URL}` || process.env.NEXT_PUBLIC_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}&orderNumber=${metadata.orderNumber}`,
-      cancel_url: `${`https://${process.env.VERRCEL_URL}` || process.env.NEXT_PUBLIC_BASE_URL}/basket`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       line_items: items.map((item) => ({
         price_data: {
           currency: "usd",
@@ -57,9 +58,7 @@ export async function createCheckoutSession(
           product_data: {
             name: item.product.name || "Unnamed Product",
             description: `Product ID: ${item.product._id}`,
-            metadata: {
-              id: item.product._id,
-            },
+            metadata: { id: item.product._id },
             images: item.product.image
               ? [imageUrl(item.product.image).url()]
               : undefined,
@@ -69,7 +68,6 @@ export async function createCheckoutSession(
       })),
     });
 
-    // Return the checkout URL
     return session.url;
   } catch (error) {
     console.error("Error creating checkout session:", error);
