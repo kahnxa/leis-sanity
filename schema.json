@@ -460,6 +460,13 @@
         },
         "optional": true
       },
+      "amountDiscount": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "stripeCustomerId": {
         "type": "objectAttribute",
         "value": {
@@ -558,7 +565,7 @@
       "totalPrice": {
         "type": "objectAttribute",
         "value": {
-          "type": "string"
+          "type": "number"
         },
         "optional": true
       },

@@ -19,6 +19,11 @@ export const orderType = defineType({
       type: "string",
     }),
     defineField({
+      name: "amountDiscount",
+      title: "Amount Discount",
+      type: "number",
+    }),
+    defineField({
       name: "stripeCustomerId",
       title: "Stripe Customer ID",
       type: "string",
@@ -90,7 +95,7 @@ export const orderType = defineType({
     defineField({
       name: "totalPrice",
       title: "Total",
-      type: "string",
+      type: "number",
       validation: (Rule) => Rule.required().min(0),
     }),
     defineField({
