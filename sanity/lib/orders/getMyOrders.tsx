@@ -11,8 +11,7 @@ export async function getMyOrders(userId: string) {
       ...,
       products[]{
         ...,
-        product-> {
-        }
+        product->
       }
     }
   `);
