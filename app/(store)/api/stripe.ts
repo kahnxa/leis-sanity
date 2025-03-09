@@ -20,7 +20,10 @@ export default async function handler(
     } else {
       res.status(405).json({ error: "Method Not Allowed" });
     }
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
+  } catch (error) {
+    res.status(500).json({
+      error:
+        error instanceof Error ? error.message : "An unexpected error occurred",
+    });
   }
 }

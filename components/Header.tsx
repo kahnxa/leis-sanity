@@ -5,7 +5,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import MobileMenu from "./MobileMenu";
-import { PackageIcon, TrolleyIcon, UserIcon } from "@sanity/icons";
+import { TrolleyIcon, UserIcon } from "@sanity/icons";
 import useBasketStore from "@/store/store";
 
 function Header() {
