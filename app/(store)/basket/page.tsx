@@ -1,4 +1,5 @@
 "use client";
+
 import AddToBasketButton from "@/components/AddToBasketButton";
 import { imageUrl } from "@/lib/imageUrl";
 import useBasketStore from "@/store/store";
@@ -124,7 +125,7 @@ function BasketPage() {
             <button
               onClick={handleCheckout}
               disabled={isLoading}
-              className="mt-4 w-full bg-[#27aae1] text-white px-4 py-2 rounded hover:bg-[#27aae1] disabled:bg-gray-400"
+              className="mt-4 w-full bg-black text-white px-4 py-2 rounded hover:bg-gray-800 disabled:bg-gray-400"
             >
               {isLoading ? "Processing..." : "Checkout"}
             </button>
