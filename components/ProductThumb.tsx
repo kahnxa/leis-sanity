@@ -8,9 +8,9 @@ function ProductThumb({ product }: { product: Product }) {
   return (
     <Link
       href={`/product/${product.slug?.current}`}
-      className={`group flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden ${isOutOfStock ? "opacity-50" : ""}`}
+      className={`group flex flex-col bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden h-full ${isOutOfStock ? "opacity-50" : ""}`}
     >
-      <div className="relative aspect-square w-full h-full overflow-hidden">
+      <div className="relative aspect-square w-full overflow-hidden">
         {product.image && (
           <Image
             className="object-contain transition-transform duration-300 group-hover:scale-105"
@@ -27,12 +27,12 @@ function ProductThumb({ product }: { product: Product }) {
           </div>
         )}
       </div>
-      <div className="p-4">
+      <div className="p-4 flex flex-col flex-1">
         <h2 className="text-lg font-semibold text-gray-800 truncate">
           {product.name}
         </h2>
 
-        <p className="mt-2 text-sm text-gray-600 line-clamp-2">
+        <p className="mt-2 text-sm text-gray-600 line-clamp-2 h-10">
           {product.description
             ?.map((block) =>
               block._type === "block"
@@ -41,7 +41,7 @@ function ProductThumb({ product }: { product: Product }) {
             )
             .join(" ") || "No description available"}
         </p>
-        <p className="mt-2 text-lg font-bold text-gray-900">
+        <p className="mt-auto pt-2 text-lg font-bold text-gray-900">
           ${product.price?.toFixed(2)}
         </p>
       </div>

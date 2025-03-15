@@ -14,7 +14,7 @@ function ProductGrid({ products }: { products: Product[] }) {
               initial={{ opacity: 0.2 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex justify-center"
+              className="w-full h-full" // Changed from "flex justify-center"
             >
               <ProductThumb key={product._id} product={product} />
             </motion.div>
