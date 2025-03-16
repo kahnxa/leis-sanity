@@ -37,13 +37,15 @@ function Header() {
         </nav>
 
         {/* Logo */}
-        <Image
-          src="/lowerCase_logo.svg"
-          alt="Logo"
-          width={140}
-          height={70}
-          className="mx-10 sm:block"
-        />
+        <Link href="/">
+          <Image
+            src="/lowerCase_logo.svg"
+            alt="Logo"
+            width={140}
+            height={70}
+            className="mx-10 sm:block"
+          />
+        </Link>
 
         {/* Right Navigation Links */}
         <nav className="flex items-center gap-4 text-sm font-medium text-black">

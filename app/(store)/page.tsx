@@ -1,6 +1,6 @@
-import ProductsView from "@/components/ProductsView";
-import HolidaySaleBanner from "@/components/ui/holiday-sale-banner";
 import ImageSlider from "@/components/ImageSlider";
+import ProductsView from "@/components/ProductsView";
+
 import { getAllCategories } from "@/sanity/lib/products/getAllCategories";
 import { getAllProducts } from "@/sanity/lib/products/getAllProducts";
 
