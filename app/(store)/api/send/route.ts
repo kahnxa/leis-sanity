@@ -1,5 +1,4 @@
 import { Resend } from "resend"; // Make sure to install resend: npm install resend
-// This points to the component we'll create next
 import { NextResponse } from "next/server";
 import { EmailTemplate } from "@/components/ui/email-template";
 

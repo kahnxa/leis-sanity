@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import useBasketStore from "@/store/store";
 
-function SuccessPage() {
+function SuccessPageContent() {
   const searchParams = useSearchParams();
   const orderNumber = searchParams.get("orderNumber");
   const clearBasket = useBasketStore((state) => state.clearBasket);
@@ -40,7 +40,6 @@ function SuccessPage() {
         <h1 className="text-4xl font-bold mb-6 text-center">
           Thank you for your order!
         </h1>
-
         <div className="border-t border-b border-gray-200 py-6 mb-6 text-center">
           <p className="text-lg text-gray-700 mb-4">
             Your order has been confirmed and will be shipped shortly.
@@ -56,7 +55,6 @@ function SuccessPage() {
             )}
           </div>
         </div>
-
         <div className="space-y-4 text-center">
           <p className="text-gray-600">
             A confirmation email has been sent to your registered email address.
@@ -72,6 +70,25 @@ function SuccessPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Wrapper component with Suspense
+function SuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
+          <div className="bg-white p-12 rounded-xl shadow-lg max-w-2xl w-full mx-4 text-center">
+            <h1 className="text-2xl font-bold mb-4">
+              Loading order details...
+            </h1>
+          </div>
+        </div>
+      }
+    >
+      <SuccessPageContent />
+    </Suspense>
   );
 }
 
