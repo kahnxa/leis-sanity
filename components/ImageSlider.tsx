@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 interface SliderImage {
   url: string;
@@ -17,6 +18,16 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const totalSlides = images.length;
 
+  // Wrap goToNext in useCallback to prevent recreation on every render
+  const goToNext = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentIndex((prevIndex) =>
+      prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
+    );
+    setTimeout(() => setIsTransitioning(false), 500);
+  }, [isTransitioning, totalSlides]);
+
   // Auto-scroll functionality - every 3 seconds
   useEffect(() => {
     const timer = setInterval(() => {
@@ -24,32 +35,28 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
     }, 3000);
 
     return () => clearInterval(timer);
-  }, [currentIndex]);
+  }, [goToNext]); // Now goToNext is stable and won't cause unnecessary effect triggers
 
-  const goToPrevious = () => {
+  // Wrap goToPrevious in useCallback as well for consistency
+  const goToPrevious = useCallback(() => {
     if (isTransitioning) return;
     setIsTransitioning(true);
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? totalSlides - 1 : prevIndex - 1
     );
     setTimeout(() => setIsTransitioning(false), 500);
-  };
+  }, [isTransitioning, totalSlides]);
 
-  const goToNext = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex((prevIndex) =>
-      prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
-    );
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
-
-  const goToSlide = (index: number) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsTransitioning(false), 500);
-  };
+  // Wrap goToSlide in useCallback for consistency
+  const goToSlide = useCallback(
+    (index: number) => {
+      if (isTransitioning) return;
+      setIsTransitioning(true);
+      setCurrentIndex(index);
+      setTimeout(() => setIsTransitioning(false), 500);
+    },
+    [isTransitioning]
+  );
 
   return (
     <div className="relative w-full h-96 md:h-80 lg:h-96 overflow-hidden">
@@ -60,10 +67,12 @@ const ImageSlider: React.FC<ImageSliderProps> = ({ images }) => {
       >
         {images.map((image: SliderImage, index: number) => (
           <div key={index} className="min-w-full h-full relative">
-            <img
+            <Image
               src={image.url}
               alt={image.alt}
-              className="w-full h-full object-contain md:object-cover"
+              fill
+              className="object-contain md:object-cover"
+              priority={index === 0}
             />
           </div>
         ))}
