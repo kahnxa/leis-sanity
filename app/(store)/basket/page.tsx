@@ -1,6 +1,5 @@
 "use client";
 
-import AddToBasketButton from "@/components/AddToBasketButton";
 import { imageUrl } from "@/lib/imageUrl";
 import useBasketStore from "@/store/store";
 import { useAuth, useUser } from "@clerk/nextjs";
@@ -15,6 +14,10 @@ import {
 
 function BasketPage() {
   const groupedItems = useBasketStore((state) => state.getGroupedItems());
+  const addItem = useBasketStore((state) => state.addItem);
+  const removeItem = useBasketStore((state) => state.removeItem);
+  const getTotalPrice = useBasketStore((state) => state.getTotalPrice);
+
   const { isSignedIn } = useAuth();
   const { user } = useUser();
   const router = useRouter();
@@ -60,8 +63,6 @@ function BasketPage() {
     );
   }
 
-  console.log("BASKET CONTENTS", groupedItems);
-
   return (
     <div className="container mx-auto p-4 max-w-6xl">
       <h1 className="text-2xl font-bold mb-4">Your Cart</h1>
@@ -100,7 +101,25 @@ function BasketPage() {
                 </div>
               </div>
               <div className="flex items-center ml-4 flex-shrink-0">
-                <AddToBasketButton product={item.product} />
+                <div className="flex items-center border rounded">
+                  <button
+                    onClick={() => removeItem(item.product._id)}
+                    className="px-3 py-1 text-lg font-medium hover:bg-gray-100"
+                    aria-label="Decrease quantity"
+                  >
+                    -
+                  </button>
+                  <span className="px-3 py-1 min-w-8 text-center">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => addItem(item.product)}
+                    className="px-3 py-1 text-lg font-medium hover:bg-gray-100"
+                    aria-label="Increase quantity"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
             </div>
           ))}
@@ -116,9 +135,7 @@ function BasketPage() {
             </p>
             <p className="flex justify-between text-2xl font-bold border-t pt-2">
               <span>Total:</span>
-              <span>
-                ${useBasketStore.getState().getTotalPrice().toFixed(2)}
-              </span>
+              <span>${getTotalPrice().toFixed(2)}</span>
             </p>
           </div>
           {isSignedIn ? (

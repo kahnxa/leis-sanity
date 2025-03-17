@@ -96,6 +96,18 @@ async function createOrderInSanity(
     stripeCustomerId
   );
 
+  const existingOrder = await backendClient.fetch(
+    `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
+    {
+      sessionId: session.id,
+    }
+  );
+
+  if (existingOrder) {
+    console.log("Order already exists for this session:", session.id);
+    return existingOrder;
+  }
+
   const order = await backendClient.create({
     _type: "order",
     orderNumber,
