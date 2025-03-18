@@ -1,61 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 840.6 291.6">
-  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 863.8 420.6">
+  <!-- Generator: Adobe Illustrator 29.3.1, SVG Export Plug-In . SVG Version: 2.1.0 Build 151)  -->
   <defs>
     <style>
+      .st0 {
+        fill: #231f20;
+        font-size: 320.6px;
+      }
+
       .st0, .st1, .st2 {
         isolation: isolate;
       }
 
-      .st1 {
-        fill: #231f20;
-        font-size: 367.7px;
-      }
-
-      .st1, .st2 {
+      .st0, .st2 {
         font-family: HelveticaNeue-Medium, 'Helvetica Neue';
         font-weight: 500;
+      }
+
+      .st2 {
+        fill: #fff;
+        font-size: 66.7px;
       }
 
       .st3 {
         fill: #29aae1;
       }
-
-      .st2 {
-        fill: #fff;
-        font-size: 76.5px;
-      }
     </style>
   </defs>
-  <g class="st0">
-    <g class="st0">
-      <g class="st0">
-        <g class="st0">
-          <text class="st1" transform="translate(-23.2 262.5)"><tspan x="0" y="0">leis</tspan></text>
+  <g class="st1">
+    <g class="st1">
+      <g class="st1">
+        <g class="st1">
+          <g class="st1">
+            <text class="st0" transform="translate(0 328.6)"><tspan x="0" y="0">leis</tspan></text>
+          </g>
         </g>
       </g>
     </g>
   </g>
-  <circle class="st3" cx="702.1" cy="153.1" r="138.5" transform="translate(97.4 541.3) rotate(-45)"/>
-  <g class="st0">
-    <g class="st0">
-      <g class="st0">
-        <g class="st0">
-          <text class="st2" transform="translate(593 178.7)"><tspan x="0" y="0">[u</tspan></text>
+  <circle class="st3" cx="632.4" cy="233.2" r="120.8"/>
+  <g class="st1">
+    <g class="st1">
+      <g class="st1">
+        <g class="st1">
+          <g class="st1">
+            <text class="st2" transform="translate(537.3 255.6)"><tspan x="0" y="0">[u</tspan></text>
+          </g>
         </g>
       </g>
     </g>
-    <g class="st0">
-      <g class="st0">
-        <g class="st0">
-          <text class="st2" transform="translate(659.5 178.7)"><tspan x="0" y="0">r</tspan></text>
+    <g class="st1">
+      <g class="st1">
+        <g class="st1">
+          <g class="st1">
+            <text class="st2" transform="translate(595.3 255.6)"><tspan x="0" y="0">r</tspan></text>
+          </g>
         </g>
       </g>
     </g>
-    <g class="st0">
-      <g class="st0">
-        <g class="st0">
-          <text class="st2" transform="translate(684.8 178.7)"><tspan x="0" y="0">ely]</tspan></text>
+    <g class="st1">
+      <g class="st1">
+        <g class="st1">
+          <g class="st1">
+            <text class="st2" transform="translate(617.3 255.6)"><tspan x="0" y="0">ely]</tspan></text>
+          </g>
         </g>
       </g>
     </g>

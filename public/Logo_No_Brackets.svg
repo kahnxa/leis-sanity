@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 863.82 420.65">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        font-size: 100px;
+      }
+
+      .cls-3, .cls-2 {
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-weight: 500;
+      }
+
+      .cls-2 {
+        fill: #231f20;
+        font-size: 367.7px;
+      }
+
+      .cls-4 {
+        fill: #2da9e1;
+      }
+
+      .cls-5 {
+        letter-spacing: -.02em;
+      }
+    </style>
+  </defs>
+  <g class="cls-1">
+    <g class="cls-1">
+      <g class="cls-1">
+        <g class="cls-1">
+          <g class="cls-1">
+            <text class="cls-2" transform="translate(0 315.12)"><tspan x="0" y="0">leis</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+  <circle class="cls-4" cx="725.32" cy="205.72" r="138.5"/>
+  <text class="cls-3" transform="translate(614.12 241.42)"><tspan x="0" y="0">u</tspan><tspan class="cls-5" x="57.4" y="0">r</tspan><tspan x="90.8" y="0">ely</tspan></text>
+</svg>

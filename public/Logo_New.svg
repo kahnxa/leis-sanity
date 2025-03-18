@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1610.01 779.87">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #231f20;
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-size: 681.71px;
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        isolation: isolate;
+      }
+
+      .cls-1, .cls-3 {
+        font-weight: 500;
+      }
+
+      .cls-4 {
+        fill: #2da9e1;
+      }
+
+      .cls-3 {
+        fill: #fff;
+        font-family: HelveticaNeue-MediumItalic, 'Helvetica Neue';
+        font-size: 60.17px;
+        font-style: italic;
+      }
+    </style>
+  </defs>
+  <circle class="cls-4" cx="1353.23" cy="400.92" r="256.78"/>
+  <g class="cls-2">
+    <g class="cls-2">
+      <g class="cls-2">
+        <g class="cls-2">
+          <text class="cls-3" transform="translate(1328.14 331.3)"><tspan x="0" y="0">a </tspan><tspan x="-96.96" y="72.2">leisurely </tspan><tspan x="-52.95" y="144.4">game</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+  <g class="cls-2">
+    <g class="cls-2">
+      <g class="cls-2">
+        <g class="cls-2">
+          <g class="cls-2">
+            <text class="cls-1" transform="translate(0 584.22)"><tspan x="0" y="0">leis</tspan></text>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
