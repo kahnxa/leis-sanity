@@ -4,12 +4,13 @@ import { backendClient } from "@/sanity/lib/backendClient";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { updateProductStock } from "@/actions/updateProductStock";
 
 export async function POST(req: NextRequest) {
   const stripe = initializeStripe();
   const body = await req.text();
-  const headersList = await headers();
-  const sig = headersList.get("stripe-signature");
+  const headersList = headers();
+  const sig = (await headersList).get("stripe-signature");
 
   if (!sig) {
     return NextResponse.json({ error: "No Signature" }, { status: 400 });
@@ -27,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    // Verify the webhook signature using Stripe's constructEvent method ***** Need to check on this
+    // Verify the webhook signature using Stripe's constructEvent method
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (error) {
     console.error("Webhook signature verification failed:", error);
@@ -41,13 +42,17 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
 
     try {
+      // Create the order in Sanity
       const order = await createOrderInSanity(session, stripe);
-      console.log("order created in Sanity");
       console.log("order created in Sanity", order);
+
+      // Update product stock levels
+      await updateProductStockForOrder(session, stripe);
+      console.log("Product stock levels updated");
     } catch (error) {
-      console.error("Error creating order in Sanity", error);
+      console.error("Error processing order:", error);
       return NextResponse.json(
-        { error: "Error creating order" },
+        { error: "Error processing order" },
         { status: 500 }
       );
     }
@@ -56,9 +61,29 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
+async function updateProductStockForOrder(
+  session: Stripe.Checkout.Session,
+  stripe: ReturnType<typeof initializeStripe>
+) {
+  // Get the line items from the session
+  const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+    expand: ["data.price.product"],
+  });
+
+  // Update stock for each product
+  for (const item of lineItems.data) {
+    const productId = (item.price?.product as Stripe.Product)?.metadata?.id;
+    const quantity = item.quantity || 0;
+
+    if (productId && quantity > 0) {
+      await updateProductStock(productId, quantity);
+    }
+  }
+}
+
 async function createOrderInSanity(
   session: Stripe.Checkout.Session,
-  stripe: ReturnType<typeof initializeStripe> // Use the type from initializeStripe
+  stripe: ReturnType<typeof initializeStripe>
 ) {
   const {
     id,

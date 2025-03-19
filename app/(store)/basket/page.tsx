@@ -11,6 +11,7 @@ import {
   createCheckoutSession,
   Metadata,
 } from "@/actions/createCheckoutSession";
+import ItemQuantityControl from "@/components/ItemQuantityControl"; // Import the new component
 
 function BasketPage() {
   const groupedItems = useBasketStore((state) => state.getGroupedItems());
@@ -101,25 +102,14 @@ function BasketPage() {
                 </div>
               </div>
               <div className="flex items-center ml-4 flex-shrink-0">
-                <div className="flex items-center border rounded">
-                  <button
-                    onClick={() => removeItem(item.product._id)}
-                    className="px-3 py-1 text-lg font-medium hover:bg-gray-100"
-                    aria-label="Decrease quantity"
-                  >
-                    -
-                  </button>
-                  <span className="px-3 py-1 min-w-8 text-center">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => addItem(item.product)}
-                    className="px-3 py-1 text-lg font-medium hover:bg-gray-100"
-                    aria-label="Increase quantity"
-                  >
-                    +
-                  </button>
-                </div>
+                {/* Using the new ItemQuantityControl component */}
+                <ItemQuantityControl
+                  productId={item.product._id}
+                  quantity={item.quantity}
+                  onIncrement={() => addItem(item.product)}
+                  onDecrement={() => removeItem(item.product._id)}
+                  stock={item.product.stock} // Using stock to match your Sanity schema
+                />
               </div>
             </div>
           ))}

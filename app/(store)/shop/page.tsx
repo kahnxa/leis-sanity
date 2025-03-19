@@ -8,7 +8,8 @@ async function ShopPage() {
   const products = await getAllProducts();
 
   return (
-    <div className="flex flex-col items-center justify-top min-h-screen bg-gray-100 p-4">
+    <div className="container mx-auto px-4 pb-12 mt-8">
+      <h2 className="text-2xl font-bold mb-6">Products</h2>
       <ProductsView products={products} categories={[]} />
     </div>
   );

@@ -12,12 +12,6 @@ async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
 
-  console.log(
-    crypto.randomUUID().slice(0, 5) +
-      `>>> Rerendered the product page cache for ${slug}`
-  );
-  console.log(">>> NEED THIS", process.env.NEXT_PUBLIC_SANITY_DATASET);
-
   if (!product) {
     return notFound();
   }

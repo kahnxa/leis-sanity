@@ -26,8 +26,19 @@ const useBasketStore = create<BasketState>()(
           const existingItem = state.items.find(
             (item) => item.product._id === product._id
           );
+
+          // Check if adding would exceed stock limit
           if (existingItem) {
-            // If product exists, increment quantity
+            // If product exists, check if we can increment quantity
+            if (
+              product.stock !== undefined &&
+              existingItem.quantity >= product.stock
+            ) {
+              // Don't increment if we've reached the stock limit
+              return { items: state.items };
+            }
+
+            // If stock allows, increment quantity
             return {
               items: state.items.map((item) =>
                 item.product._id === product._id
@@ -37,6 +48,7 @@ const useBasketStore = create<BasketState>()(
             };
           } else {
             // If product doesn't exist, add new item with quantity 1
+            // (We always allow adding at least one item)
             return { items: [...state.items, { product, quantity: 1 }] };
           }
         }),
