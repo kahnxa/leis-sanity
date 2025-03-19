@@ -1,31 +1,35 @@
+// actions/updateProductStock.ts
 import { backendClient } from "@/sanity/lib/backendClient";
 
 export async function updateProductStock(productId: string, quantity: number) {
   try {
-    // Check if product exists and has a stock field
+    // Get current stock
     const product = await backendClient.fetch(
       `*[_type == "product" && _id == $productId][0]`,
       { productId }
     );
 
     if (!product) {
-      console.error(`Product with ID ${productId} not found`);
-      return false;
+      console.error(`Product not found: ${productId}`);
+      return { success: false, error: "Product not found" };
     }
 
-    // Ensure product has a stock field
     const currentStock = product.stock || 0;
-    const newStock = Math.max(0, currentStock - quantity);
-
-    // Update the product stock in Sanity
-    await backendClient.patch(productId).set({ stock: newStock }).commit();
+    const newStock = Math.max(0, currentStock - quantity); // Prevent negative stock
 
     console.log(
-      `Updated stock for product ${productId}: ${currentStock} -> ${newStock}`
+      `Product ${productId}: Current stock ${currentStock}, new stock ${newStock}`
     );
-    return true;
+
+    // Update stock in Sanity
+    const result = await backendClient
+      .patch(productId)
+      .set({ stock: newStock })
+      .commit();
+
+    return { success: true, updatedProduct: result };
   } catch (error) {
-    console.error("Error updating product stock:", error);
-    return false;
+    console.error(`Error updating product stock:`, error);
+    return { success: false, error };
   }
 }

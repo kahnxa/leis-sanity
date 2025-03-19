@@ -42,13 +42,16 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
 
     try {
+      // Start transaction if your database supports it
+      console.log("Processing order for session ID:", session.id);
+
       // Create the order in Sanity
       const order = await createOrderInSanity(session, stripe);
-      console.log("order created in Sanity", order);
+      console.log("Order created in Sanity:", order._id);
 
       // Update product stock levels
       await updateProductStockForOrder(session, stripe);
-      console.log("Product stock levels updated");
+      console.log("Product stock levels updated successfully");
     } catch (error) {
       console.error("Error processing order:", error);
       return NextResponse.json(
@@ -70,13 +73,30 @@ async function updateProductStockForOrder(
     expand: ["data.price.product"],
   });
 
+  console.log(
+    `Processing ${lineItems.data.length} line items for stock update`
+  );
+
   // Update stock for each product
   for (const item of lineItems.data) {
-    const productId = (item.price?.product as Stripe.Product)?.metadata?.id;
+    const product = item.price?.product as Stripe.Product;
+    const productId = product?.metadata?.id;
     const quantity = item.quantity || 0;
 
-    if (productId && quantity > 0) {
-      await updateProductStock(productId, quantity);
+    if (!productId) {
+      console.error(`Missing product ID in metadata for line item`, item);
+      continue;
+    }
+
+    console.log(
+      `Updating stock for product ${productId}, reducing by ${quantity}`
+    );
+
+    try {
+      const result = await updateProductStock(productId, quantity);
+      console.log(`Stock update result for ${productId}:`, result);
+    } catch (error) {
+      console.error(`Failed to update stock for product ${productId}:`, error);
     }
   }
 }
