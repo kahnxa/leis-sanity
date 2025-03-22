@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { updateProductStock } from "@/actions/updateProductStock";
 
+// If Webhook is not working make sure to run: stripe listen --forward-to http://localhost:3000/webhook in the terminal
 export async function POST(req: NextRequest) {
   const stripe = initializeStripe();
   const body = await req.text();
@@ -105,6 +106,32 @@ async function createOrderInSanity(
   session: Stripe.Checkout.Session,
   stripe: ReturnType<typeof initializeStripe>
 ) {
+  // TypeScript casting to access properties that exist at runtime but aren't in the type definitions
+  const sessionWithShipping = session as Stripe.Checkout.Session & {
+    shipping?: {
+      name?: string;
+      address?: {
+        line1: string;
+        line2?: string;
+        city: string;
+        state: string;
+        postal_code: string;
+        country: string;
+      };
+    };
+    customer_details?: {
+      name?: string;
+      address?: {
+        line1: string;
+        line2?: string;
+        city: string;
+        state: string;
+        postal_code: string;
+        country: string;
+      };
+    };
+  };
+
   const {
     id,
     amount_total,
@@ -114,6 +141,9 @@ async function createOrderInSanity(
     customer,
     total_details,
   } = session;
+
+  // Now access the shipping and customer_details from our extended type
+  const { shipping, customer_details } = sessionWithShipping;
 
   const { orderNumber, customerName, customerEmail, clerkUserId } =
     metadata as Metadata;
@@ -153,6 +183,41 @@ async function createOrderInSanity(
     return existingOrder;
   }
 
+  // Process shipping address
+  const shippingAddress = shipping?.address
+    ? {
+        name: shipping.name || customerName,
+        line1: shipping.address.line1,
+        line2: shipping.address.line2 || "",
+        city: shipping.address.city,
+        state: shipping.address.state,
+        postalCode: shipping.address.postal_code,
+        country: shipping.address.country,
+      }
+    : null;
+
+  // Process billing address
+  // Determine if billing address is different from shipping
+  const billingAddress = customer_details?.address
+    ? {
+        name: customer_details.name || customerName,
+        line1: customer_details.address.line1,
+        line2: customer_details.address.line2 || "",
+        city: customer_details.address.city,
+        state: customer_details.address.state,
+        postalCode: customer_details.address.postal_code,
+        country: customer_details.address.country,
+      }
+    : null;
+
+  // Check if billing is same as shipping
+  const billingAddressSameAsShipping =
+    !billingAddress ||
+    (shippingAddress &&
+      billingAddress.line1 === shippingAddress.line1 &&
+      billingAddress.city === shippingAddress.city &&
+      billingAddress.postalCode === shippingAddress.postalCode);
+
   const order = await backendClient.create({
     _type: "order",
     orderNumber,
@@ -170,6 +235,12 @@ async function createOrderInSanity(
     totalPrice: amount_total ? amount_total / 100 : 0,
     status: "paid",
     orderDate: new Date().toISOString(),
+    // Add shipping address if available
+    ...(shippingAddress && { shippingAddress }),
+    // Set if billing is same as shipping
+    billingAddressSameAsShipping,
+    // Add billing address if different from shipping
+    ...(!billingAddressSameAsShipping && billingAddress && { billingAddress }),
   });
 
   return order;

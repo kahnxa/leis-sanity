@@ -66,11 +66,10 @@ export async function createCheckoutSession(
         },
         quantity: item.quantity,
       })),
-      // Enable address collection
+      // Enable shipping address collection
       shipping_address_collection: {
-        allowed_countries: ["US", "CA", "GB"], // Specify allowed countries
+        allowed_countries: ["US"], // Add more countries as needed
       },
-
       // For billing address collection
       billing_address_collection: "required", // or 'auto' for optional
     });

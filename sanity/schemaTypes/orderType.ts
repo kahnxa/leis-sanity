@@ -83,8 +83,8 @@ export const orderType = defineType({
             },
             prepare(select) {
               return {
-                title: `${select} x ${select.quantity}`,
-                subtitle: `${select.price * select.quantity}`,
+                title: `${select.product} x ${select.quantity}`,
+                subtitle: `${select.price * select.quantity} ${select.currency}`,
                 media: select.image,
               };
             },
@@ -123,6 +123,111 @@ export const orderType = defineType({
       title: "Order Date",
       type: "datetime",
       validation: (Rule) => Rule.required(),
+    }),
+
+    // Shipping Address Fields
+    defineField({
+      name: "shippingAddress",
+      title: "Shipping Address",
+      type: "object",
+      fields: [
+        defineField({
+          name: "name",
+          title: "Recipient Name",
+          type: "string",
+        }),
+        defineField({
+          name: "line1",
+          title: "Address Line 1",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "line2",
+          title: "Address Line 2",
+          type: "string",
+        }),
+        defineField({
+          name: "city",
+          title: "City",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "state",
+          title: "State/Province/Region",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "postalCode",
+          title: "Postal/ZIP Code",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "country",
+          title: "Country",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
+    }),
+
+    // Billing Address Fields (conditionally shown)
+    defineField({
+      name: "billingAddressSameAsShipping",
+      title: "Billing Address Same as Shipping",
+      type: "boolean",
+      initialValue: true,
+    }),
+    defineField({
+      name: "billingAddress",
+      title: "Billing Address",
+      type: "object",
+      hidden: ({ document }) => Boolean(document?.billingAddressSameAsShipping), // Hide if same as shipping address
+      fields: [
+        defineField({
+          name: "name",
+          title: "Billing Name",
+          type: "string",
+        }),
+        defineField({
+          name: "line1",
+          title: "Address Line 1",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "line2",
+          title: "Address Line 2",
+          type: "string",
+        }),
+        defineField({
+          name: "city",
+          title: "City",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "state",
+          title: "State/Province/Region",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "postalCode",
+          title: "Postal/ZIP Code",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+        defineField({
+          name: "country",
+          title: "Country",
+          type: "string",
+          validation: (Rule) => Rule.required(),
+        }),
+      ],
     }),
   ],
   preview: {
