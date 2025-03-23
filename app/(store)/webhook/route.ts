@@ -6,7 +6,6 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { updateProductStock } from "@/actions/updateProductStock";
 
-// If Webhook is not working make sure to run: stripe listen --forward-to http://localhost:3000/webhook in the terminal
 export async function POST(req: NextRequest) {
   const stripe = initializeStripe();
   const body = await req.text();
@@ -29,7 +28,6 @@ export async function POST(req: NextRequest) {
 
   let event: Stripe.Event;
   try {
-    // Verify the webhook signature using Stripe's constructEvent method
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
   } catch (error) {
     console.error("Webhook signature verification failed:", error);
@@ -43,14 +41,9 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session;
 
     try {
-      // Start transaction if your database supports it
       console.log("Processing order for session ID:", session.id);
-
-      // Create the order in Sanity
       const order = await createOrderInSanity(session, stripe);
       console.log("Order created in Sanity:", order._id);
-
-      // Update product stock levels
       await updateProductStockForOrder(session, stripe);
       console.log("Product stock levels updated successfully");
     } catch (error) {
@@ -69,7 +62,6 @@ async function updateProductStockForOrder(
   session: Stripe.Checkout.Session,
   stripe: ReturnType<typeof initializeStripe>
 ) {
-  // Get the line items from the session
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     expand: ["data.price.product"],
   });
@@ -78,7 +70,6 @@ async function updateProductStockForOrder(
     `Processing ${lineItems.data.length} line items for stock update`
   );
 
-  // Update stock for each product
   for (const item of lineItems.data) {
     const product = item.price?.product as Stripe.Product;
     const productId = product?.metadata?.id;
@@ -106,10 +97,9 @@ async function createOrderInSanity(
   session: Stripe.Checkout.Session,
   stripe: ReturnType<typeof initializeStripe>
 ) {
-  // TypeScript casting to access properties that exist at runtime but aren't in the type definitions
+  // Updated type casting to match Stripe's actual response structure
   const sessionWithShipping = session as Stripe.Checkout.Session & {
-    shipping?: {
-      name?: string;
+    shipping_details?: {
       address?: {
         line1: string;
         line2?: string;
@@ -118,6 +108,7 @@ async function createOrderInSanity(
         postal_code: string;
         country: string;
       };
+      name?: string;
     };
     customer_details?: {
       name?: string;
@@ -142,13 +133,10 @@ async function createOrderInSanity(
     total_details,
   } = session;
 
-  // Now access the shipping and customer_details from our extended type
-  const { shipping, customer_details } = sessionWithShipping;
-
+  const { shipping_details, customer_details } = sessionWithShipping;
   const { orderNumber, customerName, customerEmail, clerkUserId } =
     metadata as Metadata;
 
-  // Use the stripe instance passed as a parameter
   const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(
     id,
     {
@@ -165,17 +153,9 @@ async function createOrderInSanity(
     quantity: item.quantity || 0,
   }));
 
-  const stripeCustomerId = customer;
-  console.log(
-    "Creating order in Sanity with Stripe Customer ID:",
-    stripeCustomerId
-  );
-
   const existingOrder = await backendClient.fetch(
     `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
-    {
-      sessionId: session.id,
-    }
+    { sessionId: session.id }
   );
 
   if (existingOrder) {
@@ -183,21 +163,35 @@ async function createOrderInSanity(
     return existingOrder;
   }
 
-  // Process shipping address
-  const shippingAddress = shipping?.address
+  // Updated shipping address processing using shipping_details
+  const shippingAddress = shipping_details?.address
     ? {
-        name: shipping.name || customerName,
-        line1: shipping.address.line1,
-        line2: shipping.address.line2 || "",
-        city: shipping.address.city,
-        state: shipping.address.state,
-        postalCode: shipping.address.postal_code,
-        country: shipping.address.country,
+        name: shipping_details.name || customerName,
+        line1: shipping_details.address.line1,
+        line2: shipping_details.address.line2 || "",
+        city: shipping_details.address.city,
+        state: shipping_details.address.state,
+        postalCode: shipping_details.address.postal_code,
+        country: shipping_details.address.country,
       }
     : null;
 
-  // Process billing address
-  // Determine if billing address is different from shipping
+  // Debug logging for shipping address
+  console.log("Raw shipping details from Stripe:", shipping_details);
+  console.log("Processed shipping address:", shippingAddress);
+
+  // Validate required shipping address fields
+  if (shippingAddress) {
+    if (
+      !shippingAddress.line1 ||
+      !shippingAddress.city ||
+      !shippingAddress.postalCode
+    ) {
+      console.error("Invalid shipping address format:", shippingAddress);
+      throw new Error("Missing required shipping address fields");
+    }
+  }
+
   const billingAddress = customer_details?.address
     ? {
         name: customer_details.name || customerName,
@@ -210,7 +204,6 @@ async function createOrderInSanity(
       }
     : null;
 
-  // Check if billing is same as shipping
   const billingAddressSameAsShipping =
     !billingAddress ||
     (shippingAddress &&
@@ -235,11 +228,8 @@ async function createOrderInSanity(
     totalPrice: amount_total ? amount_total / 100 : 0,
     status: "paid",
     orderDate: new Date().toISOString(),
-    // Add shipping address if available
     ...(shippingAddress && { shippingAddress }),
-    // Set if billing is same as shipping
     billingAddressSameAsShipping,
-    // Add billing address if different from shipping
     ...(!billingAddressSameAsShipping && billingAddress && { billingAddress }),
   });
 
