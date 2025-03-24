@@ -132,6 +132,34 @@ async function Orders() {
                     ))}
                   </div>
                 </div>
+                <div className="border-t border-gray-200">
+                  <div className="px-4 py-3 sm:px-6 sm:py-4">
+                    <p className="text-sm font-semibold text-gray-600 mb-3 sm:mb-4">
+                      Shipped To
+                    </p>
+                    {order.shippingAddress ? (
+                      <div className="text-sm text-gray-600">
+                        <p className="font-medium">
+                          {order.shippingAddress.name}
+                        </p>
+                        <p>{order.shippingAddress.line1}</p>
+                        {order.shippingAddress.line2 && (
+                          <p>{order.shippingAddress.line2}</p>
+                        )}
+                        <p>
+                          {order.shippingAddress.city},{" "}
+                          {order.shippingAddress.state}{" "}
+                          {order.shippingAddress.postalCode}
+                        </p>
+                        <p>{order.shippingAddress.country}</p>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 italic">
+                        No shipping information
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
