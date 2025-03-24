@@ -53,11 +53,16 @@ function AddToBasketButton({ product, disabled }: AddToBasketButtonProps) {
         orderNumber: crypto.randomUUID(),
         customerName: user?.fullName ?? "Unknown",
         customerEmail: user?.emailAddresses[0].emailAddress ?? "Unknown",
-        clerkUserId: user!.id,
+        clerkUserId: user?.id ?? "",
+        billingAddressSameAsShipping: "true",
       };
 
       const groupedItems = useBasketStore.getState().getGroupedItems();
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
+      const checkoutUrl = await createCheckoutSession(
+        groupedItems,
+        metadata,
+        metadata.billingAddressSameAsShipping === "true"
+      );
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl;

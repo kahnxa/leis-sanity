@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 export default function RulesPage() {
   return (
     <div className="container mx-auto p-6 font-['Helvetica_Neue']">
@@ -13,7 +14,7 @@ export default function RulesPage() {
         <section>
           <h2 className="text-2xl font-semibold">Objective</h2>
           <p>
-            The goal of Leis is to eliminate all liquid in your opponents’ pint
+            The goal of Leis is to eliminate all liquid in your opponents' pint
             glasses by scoring a total of <strong>8 points</strong> (4 per
             glass). Points are earned by:
           </p>
@@ -93,7 +94,7 @@ export default function RulesPage() {
             </li>
             <li>The serve must:</li>
             <ul className="list-disc pl-8">
-              <li>Bounce once on the server’s side.</li>
+              <li>Bounce once on the server's side.</li>
               <li>
                 Reach at least nipple height as it enters the opposing side.
               </li>

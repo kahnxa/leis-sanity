@@ -6,6 +6,73 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { updateProductStock } from "@/actions/updateProductStock";
 
+// Add these interfaces near the top of your file or in a separate types file
+interface StripeAddress {
+  city?: string;
+  country?: string;
+  line1?: string;
+  line2?: string;
+  postal_code?: string;
+  state?: string;
+}
+
+interface StripeBillingDetails {
+  address?: StripeAddress;
+  email?: string;
+  name?: string;
+  phone?: string;
+}
+
+interface StripePaymentMethod {
+  id: string;
+  billing_details?: StripeBillingDetails;
+  // Add other fields you might need
+}
+
+// Define a proper type for Sanity order data
+interface SanityOrderData {
+  _type: string;
+  orderNumber: string;
+  stripeCheckoutSessionId: string;
+  stripePaymentIntentId: string | Stripe.PaymentIntent | null;
+  customerName: string;
+  stripeCustomerId: string | Stripe.Customer | Stripe.DeletedCustomer | null;
+  clerkUserId?: string;
+  email: string;
+  currency: string | null;
+  amountDiscount: number;
+  products: Array<{
+    _key: string;
+    product: {
+      _type: string;
+      _ref: string;
+    };
+    quantity: number;
+  }>;
+  totalPrice: number;
+  status: string;
+  orderDate: string;
+  shippingAddress?: {
+    name: string;
+    line1: string;
+    line2: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+  };
+  billingAddressSameAsShipping: boolean;
+  billingAddress?: {
+    name: string;
+    line1: string;
+    line2: string;
+    city: string;
+    state: string;
+    postalCode: string | undefined;
+    country: string | undefined;
+  };
+}
+
 export async function POST(req: NextRequest) {
   const stripe = initializeStripe();
   const body = await req.text();
@@ -225,8 +292,8 @@ async function createOrderInSanity(
         { expand: ["payment_method"] }
       );
 
-      const paymentMethod = paymentIntent.payment_method;
-      const billingDetails = (paymentMethod as any)?.billing_details;
+      const paymentMethod = paymentIntent.payment_method as StripePaymentMethod;
+      const billingDetails = paymentMethod?.billing_details;
 
       // If user entered complete billing details, they want separate billing
       if (
@@ -242,8 +309,8 @@ async function createOrderInSanity(
           line2: billingDetails.address.line2 || "",
           city: billingDetails.address.city,
           state: billingDetails.address.state || "",
-          postalCode: billingDetails.address.postal_code,
-          country: billingDetails.address.country,
+          postalCode: billingDetails.address.postal_code || "",
+          country: billingDetails.address.country || "",
         };
       }
     } catch (error) {
@@ -263,7 +330,7 @@ async function createOrderInSanity(
   );
 
   // Create Sanity order with very explicit handling
-  let orderData: any = {
+  const orderData: SanityOrderData = {
     _type: "order",
     orderNumber,
     stripeCheckoutSessionId: id,
