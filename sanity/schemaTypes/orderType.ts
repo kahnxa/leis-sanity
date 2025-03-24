@@ -179,7 +179,7 @@ export const orderType = defineType({
       name: "billingAddressSameAsShipping",
       title: "Billing Address Same as Shipping",
       type: "boolean",
-      initialValue: true,
+      hidden: true,
     }),
     defineField({
       name: "billingAddress",

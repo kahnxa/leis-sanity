@@ -209,19 +209,15 @@ async function createOrderInSanity(
 
   console.log("Stripe checkout billing option:", stripeCheckoutBillingOption);
 
-  // First set billing flag from our metadata as default
-  let billingAddressSameAsShipping =
+  // Explicitly convert to boolean value to avoid any type issues in Sanity
+  const billingIsSameAsShipping =
     session.metadata?.billingAddressSameAsShipping === "true";
 
-  console.log(
-    "Initial billingAddressSameAsShipping from metadata:",
-    billingAddressSameAsShipping
-  );
-
-  // Process billing address - test BOTH approaches
+  // Determine if user entered a separate billing address in Stripe
+  let userEnteredDifferentBillingAddress = false;
   let billingAddress = null;
 
-  // First try to retrieve billing address from payment intent directly
+  // Try to detect if user entered a different billing address in Stripe
   if (payment_intent) {
     try {
       const paymentIntent = await stripe.paymentIntents.retrieve(
@@ -232,13 +228,13 @@ async function createOrderInSanity(
       const paymentMethod = paymentIntent.payment_method;
       const billingDetails = (paymentMethod as any)?.billing_details;
 
+      // If user entered complete billing details, they want separate billing
       if (
         billingDetails?.address &&
         billingDetails.address.line1 &&
         billingDetails.address.city
       ) {
-        // We have a complete billing address - this means user entered it separately
-        billingAddressSameAsShipping = false;
+        userEnteredDifferentBillingAddress = true;
 
         billingAddress = {
           name: billingDetails.name || customerName,
@@ -249,35 +245,25 @@ async function createOrderInSanity(
           postalCode: billingDetails.address.postal_code,
           country: billingDetails.address.country,
         };
-
-        console.log(
-          "Using billing address from payment method:",
-          billingAddress
-        );
       }
     } catch (error) {
       console.error("Error retrieving payment intent:", error);
     }
   }
 
-  // If we couldn't get billing address and still need it
-  if (!billingAddress) {
-    if (billingAddressSameAsShipping && shippingAddress) {
-      // Use shipping as billing
-      billingAddress = { ...shippingAddress };
-      console.log("Using shipping address as billing address");
-    } else if (customer_details?.address) {
-      // Try using customer_details as fallback
-      billingAddress = {
-        name: customer_details.name || customerName,
-        // other fields
-      };
-    }
-  }
+  // Final determination - only set this to true if:
+  // 1. Our metadata says it's the same AND
+  // 2. User didn't enter different billing details in Stripe
+  const finalBillingAddressSameAsShipping =
+    billingIsSameAsShipping && !userEnteredDifferentBillingAddress;
 
-  console.log("Final billing address to be saved:", billingAddress);
+  console.log(
+    "Final billing same as shipping:",
+    finalBillingAddressSameAsShipping
+  );
 
-  const order = await backendClient.create({
+  // Create Sanity order with very explicit handling
+  let orderData: any = {
     _type: "order",
     orderNumber,
     stripeCheckoutSessionId: id,
@@ -295,9 +281,15 @@ async function createOrderInSanity(
     status: "paid",
     orderDate: new Date().toISOString(),
     ...(shippingAddress && { shippingAddress }),
-    billingAddressSameAsShipping,
-    ...(billingAddress && { billingAddress }),
-  });
+    billingAddressSameAsShipping: finalBillingAddressSameAsShipping,
+  };
+
+  // ONLY add billingAddress if we're not using shipping address
+  if (!finalBillingAddressSameAsShipping && billingAddress) {
+    orderData.billingAddress = billingAddress;
+  }
+
+  const order = await backendClient.create(orderData);
 
   return order;
 }
