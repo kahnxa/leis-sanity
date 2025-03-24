@@ -163,6 +163,10 @@ async function createOrderInSanity(
     return existingOrder;
   }
 
+  // Debug logging for understanding what Stripe sends
+  console.log("Customer details from Stripe:", customer_details);
+  console.log("Shipping details from Stripe:", shipping_details);
+
   // Updated shipping address processing using shipping_details
   const shippingAddress = shipping_details?.address
     ? {
@@ -192,24 +196,86 @@ async function createOrderInSanity(
     }
   }
 
-  const billingAddress = customer_details?.address
-    ? {
-        name: customer_details.name || customerName,
-        line1: customer_details.address.line1,
-        line2: customer_details.address.line2 || "",
-        city: customer_details.address.city,
-        state: customer_details.address.state,
-        postalCode: customer_details.address.postal_code,
-        country: customer_details.address.country,
-      }
-    : null;
+  // Add more debug logging to understand Stripe's data format
+  console.log("Raw session object from Stripe:", {
+    customer_details: session.customer_details,
+    payment_intent: session.payment_intent,
+  });
 
-  const billingAddressSameAsShipping =
-    !billingAddress ||
-    (shippingAddress &&
-      billingAddress.line1 === shippingAddress.line1 &&
-      billingAddress.city === shippingAddress.city &&
-      billingAddress.postalCode === shippingAddress.postalCode);
+  // Check if there's a billing address toggle setting in the session
+  const stripeCheckoutBillingOption = session.custom_fields?.find(
+    (field) => field.key === "billing_address_collection_option"
+  );
+
+  console.log("Stripe checkout billing option:", stripeCheckoutBillingOption);
+
+  // First set billing flag from our metadata as default
+  let billingAddressSameAsShipping =
+    session.metadata?.billingAddressSameAsShipping === "true";
+
+  console.log(
+    "Initial billingAddressSameAsShipping from metadata:",
+    billingAddressSameAsShipping
+  );
+
+  // Process billing address - test BOTH approaches
+  let billingAddress = null;
+
+  // First try to retrieve billing address from payment intent directly
+  if (payment_intent) {
+    try {
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        payment_intent as string,
+        { expand: ["payment_method"] }
+      );
+
+      const paymentMethod = paymentIntent.payment_method;
+      const billingDetails = (paymentMethod as any)?.billing_details;
+
+      if (
+        billingDetails?.address &&
+        billingDetails.address.line1 &&
+        billingDetails.address.city
+      ) {
+        // We have a complete billing address - this means user entered it separately
+        billingAddressSameAsShipping = false;
+
+        billingAddress = {
+          name: billingDetails.name || customerName,
+          line1: billingDetails.address.line1,
+          line2: billingDetails.address.line2 || "",
+          city: billingDetails.address.city,
+          state: billingDetails.address.state || "",
+          postalCode: billingDetails.address.postal_code,
+          country: billingDetails.address.country,
+        };
+
+        console.log(
+          "Using billing address from payment method:",
+          billingAddress
+        );
+      }
+    } catch (error) {
+      console.error("Error retrieving payment intent:", error);
+    }
+  }
+
+  // If we couldn't get billing address and still need it
+  if (!billingAddress) {
+    if (billingAddressSameAsShipping && shippingAddress) {
+      // Use shipping as billing
+      billingAddress = { ...shippingAddress };
+      console.log("Using shipping address as billing address");
+    } else if (customer_details?.address) {
+      // Try using customer_details as fallback
+      billingAddress = {
+        name: customer_details.name || customerName,
+        // other fields
+      };
+    }
+  }
+
+  console.log("Final billing address to be saved:", billingAddress);
 
   const order = await backendClient.create({
     _type: "order",
@@ -230,7 +296,7 @@ async function createOrderInSanity(
     orderDate: new Date().toISOString(),
     ...(shippingAddress && { shippingAddress }),
     billingAddressSameAsShipping,
-    ...(!billingAddressSameAsShipping && billingAddress && { billingAddress }),
+    ...(billingAddress && { billingAddress }),
   });
 
   return order;

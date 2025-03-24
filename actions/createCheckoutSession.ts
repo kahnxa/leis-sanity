@@ -9,6 +9,7 @@ export type Metadata = {
   customerName: string;
   customerEmail: string;
   clerkUserId: string;
+  billingAddressSameAsShipping: string;
 };
 
 export type GroupedBasketItem = {
@@ -18,7 +19,8 @@ export type GroupedBasketItem = {
 
 export async function createCheckoutSession(
   items: GroupedBasketItem[],
-  metadata: Metadata
+  metadata: Metadata,
+  isBillingAddressSameAsShipping: boolean
 ) {
   try {
     const itemsWithoutPrice = items.filter((item) => !item.product.price);
@@ -46,7 +48,12 @@ export async function createCheckoutSession(
       customer: customerId,
       customer_creation: customerId ? undefined : "always",
       customer_email: customerId ? undefined : metadata.customerEmail,
-      metadata,
+      metadata: {
+        ...metadata,
+        billingAddressSameAsShipping: (
+          isBillingAddressSameAsShipping ?? true
+        ).toString(),
+      },
       mode: "payment",
       allow_promotion_codes: true,
       success_url: successUrl,

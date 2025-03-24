@@ -39,9 +39,14 @@ function BasketPage() {
         customerName: user?.fullName ?? "Unknown",
         customerEmail: user?.emailAddresses[0].emailAddress ?? "Unknown",
         clerkUserId: user!.id,
+        billingAddressSameAsShipping: "true",
       };
 
-      const checkoutUrl = await createCheckoutSession(groupedItems, metadata);
+      const checkoutUrl = await createCheckoutSession(
+        groupedItems,
+        metadata,
+        true
+      );
 
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
