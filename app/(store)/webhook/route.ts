@@ -48,6 +48,8 @@ interface SanityOrderData {
       _ref: string;
     };
     quantity: number;
+    unitPrice: number;
+    name: string;
   }>;
   totalPrice: number;
   status: string;
@@ -71,6 +73,8 @@ interface SanityOrderData {
     postalCode: string | undefined;
     country: string | undefined;
   };
+  shippingCost: number;
+  taxAmount: number;
 }
 
 export async function POST(req: NextRequest) {
@@ -165,23 +169,48 @@ async function createOrderInSanity(
   stripe: ReturnType<typeof initializeStripe>
 ) {
   try {
-    // Retrieve line items from the session
-    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-
-    // Log for debugging
-    console.log("Line items received:", lineItems);
-
-    // Filter out shipping and tax items - only keep actual products
-    const productLineItems = lineItems.data.filter((item) => {
-      // Check if price exists first
-      if (!item.price) return false;
-
-      // Get the product ID from the price object
-      const priceId = item.price.id;
-      return !priceId.includes("shipping") && !priceId.includes("tax");
+    // Retrieve line items WITH product expansion
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
+      expand: ["data.price.product"],
     });
 
-    console.log("Product line items:", productLineItems);
+    // Filter items by type
+    const productItems = lineItems.data.filter((item) => {
+      if (!item.price) return false;
+      const product = item.price.product as Stripe.Product;
+      // Only keep items that are NOT shipping or tax
+      return (
+        !product?.name?.includes("Shipping") && !product?.name?.includes("Tax")
+      );
+    });
+
+    // Find shipping and tax items
+    const shippingItem = lineItems.data.find((item) =>
+      (item.price?.product as Stripe.Product)?.name?.includes("Shipping")
+    );
+
+    const taxItem = lineItems.data.find((item) =>
+      (item.price?.product as Stripe.Product)?.name?.includes("Tax")
+    );
+
+    // Create product references (only for actual products)
+    const sanityProducts = productItems.map((item) => ({
+      _key: crypto.randomUUID(),
+      product: {
+        _type: "reference",
+        _ref: (item.price?.product as Stripe.Product)?.metadata?.id,
+      },
+      quantity: item.quantity || 0,
+      unitPrice: (item.price?.unit_amount || 0) / 100,
+      name: (item.price?.product as Stripe.Product)?.name || "Unknown Product",
+    }));
+
+    // Add shipping and tax info to order document
+    const shippingCost = shippingItem
+      ? (shippingItem.amount_total || 0) / 100
+      : 0;
+
+    const taxAmount = taxItem ? (taxItem.amount_total || 0) / 100 : 0;
 
     // Updated type casting to match Stripe's actual response structure
     const sessionWithShipping = session as Stripe.Checkout.Session & {
@@ -222,15 +251,6 @@ async function createOrderInSanity(
     const { shipping_details, customer_details } = sessionWithShipping;
     const { orderNumber, customerName, customerEmail, clerkUserId } =
       metadata as Metadata;
-
-    const sanityProducts = productLineItems.map((item) => ({
-      _key: crypto.randomUUID(),
-      product: {
-        _type: "reference",
-        _ref: (item.price?.product as Stripe.Product)?.metadata?.id,
-      },
-      quantity: item.quantity || 0,
-    }));
 
     const existingOrder = await backendClient.fetch(
       `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
@@ -360,8 +380,10 @@ async function createOrderInSanity(
       totalPrice: amount_total ? amount_total / 100 : 0,
       status: "paid",
       orderDate: new Date().toISOString(),
-      ...(shippingAddress && { shippingAddress }),
       billingAddressSameAsShipping: finalBillingAddressSameAsShipping,
+      shippingCost: shippingCost,
+      taxAmount: taxAmount,
+      ...(shippingAddress && { shippingAddress }),
     };
 
     // ONLY add billingAddress if we're not using shipping address
