@@ -164,199 +164,216 @@ async function createOrderInSanity(
   session: Stripe.Checkout.Session,
   stripe: ReturnType<typeof initializeStripe>
 ) {
-  // Updated type casting to match Stripe's actual response structure
-  const sessionWithShipping = session as Stripe.Checkout.Session & {
-    shipping_details?: {
-      address?: {
-        line1: string;
-        line2?: string;
-        city: string;
-        state: string;
-        postal_code: string;
-        country: string;
-      };
-      name?: string;
-    };
-    customer_details?: {
-      name?: string;
-      address?: {
-        line1: string;
-        line2?: string;
-        city: string;
-        state: string;
-        postal_code: string;
-        country: string;
-      };
-    };
-  };
+  try {
+    // Retrieve line items from the session
+    const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
 
-  const {
-    id,
-    amount_total,
-    currency,
-    metadata,
-    payment_intent,
-    customer,
-    total_details,
-  } = session;
+    // Log for debugging
+    console.log("Line items received:", lineItems);
 
-  const { shipping_details, customer_details } = sessionWithShipping;
-  const { orderNumber, customerName, customerEmail, clerkUserId } =
-    metadata as Metadata;
+    // Filter out shipping and tax items - only keep actual products
+    const productLineItems = lineItems.data.filter((item) => {
+      // Check if price exists first
+      if (!item.price) return false;
 
-  const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(
-    id,
-    {
-      expand: ["data.price.product"],
-    }
-  );
+      // Get the product ID from the price object
+      const priceId = item.price.id;
+      return !priceId.includes("shipping") && !priceId.includes("tax");
+    });
 
-  const sanityProducts = lineItemsWithProduct.data.map((item) => ({
-    _key: crypto.randomUUID(),
-    product: {
-      _type: "reference",
-      _ref: (item.price?.product as Stripe.Product)?.metadata?.id,
-    },
-    quantity: item.quantity || 0,
-  }));
+    console.log("Product line items:", productLineItems);
 
-  const existingOrder = await backendClient.fetch(
-    `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
-    { sessionId: session.id }
-  );
-
-  if (existingOrder) {
-    console.log("Order already exists for this session:", session.id);
-    return existingOrder;
-  }
-
-  // Debug logging for understanding what Stripe sends
-  console.log("Customer details from Stripe:", customer_details);
-  console.log("Shipping details from Stripe:", shipping_details);
-
-  // Updated shipping address processing using shipping_details
-  const shippingAddress = shipping_details?.address
-    ? {
-        name: shipping_details.name || customerName,
-        line1: shipping_details.address.line1,
-        line2: shipping_details.address.line2 || "",
-        city: shipping_details.address.city,
-        state: shipping_details.address.state,
-        postalCode: shipping_details.address.postal_code,
-        country: shipping_details.address.country,
-      }
-    : null;
-
-  // Debug logging for shipping address
-  console.log("Raw shipping details from Stripe:", shipping_details);
-  console.log("Processed shipping address:", shippingAddress);
-
-  // Validate required shipping address fields
-  if (shippingAddress) {
-    if (
-      !shippingAddress.line1 ||
-      !shippingAddress.city ||
-      !shippingAddress.postalCode
-    ) {
-      console.error("Invalid shipping address format:", shippingAddress);
-      throw new Error("Missing required shipping address fields");
-    }
-  }
-
-  // Add more debug logging to understand Stripe's data format
-  console.log("Raw session object from Stripe:", {
-    customer_details: session.customer_details,
-    payment_intent: session.payment_intent,
-  });
-
-  // Check if there's a billing address toggle setting in the session
-  const stripeCheckoutBillingOption = session.custom_fields?.find(
-    (field) => field.key === "billing_address_collection_option"
-  );
-
-  console.log("Stripe checkout billing option:", stripeCheckoutBillingOption);
-
-  // Explicitly convert to boolean value to avoid any type issues in Sanity
-  const billingIsSameAsShipping =
-    session.metadata?.billingAddressSameAsShipping === "true";
-
-  // Determine if user entered a separate billing address in Stripe
-  let userEnteredDifferentBillingAddress = false;
-  let billingAddress = null;
-
-  // Try to detect if user entered a different billing address in Stripe
-  if (payment_intent) {
-    try {
-      const paymentIntent = await stripe.paymentIntents.retrieve(
-        payment_intent as string,
-        { expand: ["payment_method"] }
-      );
-
-      const paymentMethod = paymentIntent.payment_method as StripePaymentMethod;
-      const billingDetails = paymentMethod?.billing_details;
-
-      // If user entered complete billing details, they want separate billing
-      if (
-        billingDetails?.address &&
-        billingDetails.address.line1 &&
-        billingDetails.address.city
-      ) {
-        userEnteredDifferentBillingAddress = true;
-
-        billingAddress = {
-          name: billingDetails.name || customerName,
-          line1: billingDetails.address.line1,
-          line2: billingDetails.address.line2 || "",
-          city: billingDetails.address.city,
-          state: billingDetails.address.state || "",
-          postalCode: billingDetails.address.postal_code || "",
-          country: billingDetails.address.country || "",
+    // Updated type casting to match Stripe's actual response structure
+    const sessionWithShipping = session as Stripe.Checkout.Session & {
+      shipping_details?: {
+        address?: {
+          line1: string;
+          line2?: string;
+          city: string;
+          state: string;
+          postal_code: string;
+          country: string;
         };
-      }
-    } catch (error) {
-      console.error("Error retrieving payment intent:", error);
+        name?: string;
+      };
+      customer_details?: {
+        name?: string;
+        address?: {
+          line1: string;
+          line2?: string;
+          city: string;
+          state: string;
+          postal_code: string;
+          country: string;
+        };
+      };
+    };
+
+    const {
+      id,
+      amount_total,
+      currency,
+      metadata,
+      payment_intent,
+      customer,
+      total_details,
+    } = session;
+
+    const { shipping_details, customer_details } = sessionWithShipping;
+    const { orderNumber, customerName, customerEmail, clerkUserId } =
+      metadata as Metadata;
+
+    const sanityProducts = productLineItems.map((item) => ({
+      _key: crypto.randomUUID(),
+      product: {
+        _type: "reference",
+        _ref: (item.price?.product as Stripe.Product)?.metadata?.id,
+      },
+      quantity: item.quantity || 0,
+    }));
+
+    const existingOrder = await backendClient.fetch(
+      `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]`,
+      { sessionId: session.id }
+    );
+
+    if (existingOrder) {
+      console.log("Order already exists for this session:", session.id);
+      return existingOrder;
     }
+
+    // Debug logging for understanding what Stripe sends
+    console.log("Customer details from Stripe:", customer_details);
+    console.log("Shipping details from Stripe:", shipping_details);
+
+    // Updated shipping address processing using shipping_details
+    const shippingAddress = shipping_details?.address
+      ? {
+          name: shipping_details.name || customerName,
+          line1: shipping_details.address.line1,
+          line2: shipping_details.address.line2 || "",
+          city: shipping_details.address.city,
+          state: shipping_details.address.state,
+          postalCode: shipping_details.address.postal_code,
+          country: shipping_details.address.country,
+        }
+      : null;
+
+    // Debug logging for shipping address
+    console.log("Raw shipping details from Stripe:", shipping_details);
+    console.log("Processed shipping address:", shippingAddress);
+
+    // Validate required shipping address fields
+    if (shippingAddress) {
+      if (
+        !shippingAddress.line1 ||
+        !shippingAddress.city ||
+        !shippingAddress.postalCode
+      ) {
+        console.error("Invalid shipping address format:", shippingAddress);
+        throw new Error("Missing required shipping address fields");
+      }
+    }
+
+    // Add more debug logging to understand Stripe's data format
+    console.log("Raw session object from Stripe:", {
+      customer_details: session.customer_details,
+      payment_intent: session.payment_intent,
+    });
+
+    // Check if there's a billing address toggle setting in the session
+    const stripeCheckoutBillingOption = session.custom_fields?.find(
+      (field) => field.key === "billing_address_collection_option"
+    );
+
+    console.log("Stripe checkout billing option:", stripeCheckoutBillingOption);
+
+    // Explicitly convert to boolean value to avoid any type issues in Sanity
+    const billingIsSameAsShipping =
+      session.metadata?.billingAddressSameAsShipping === "true";
+
+    // Determine if user entered a separate billing address in Stripe
+    let userEnteredDifferentBillingAddress = false;
+    let billingAddress = null;
+
+    // Try to detect if user entered a different billing address in Stripe
+    if (payment_intent) {
+      try {
+        const paymentIntent = await stripe.paymentIntents.retrieve(
+          payment_intent as string,
+          { expand: ["payment_method"] }
+        );
+
+        const paymentMethod =
+          paymentIntent.payment_method as StripePaymentMethod;
+        const billingDetails = paymentMethod?.billing_details;
+
+        // If user entered complete billing details, they want separate billing
+        if (
+          billingDetails?.address &&
+          billingDetails.address.line1 &&
+          billingDetails.address.city
+        ) {
+          userEnteredDifferentBillingAddress = true;
+
+          billingAddress = {
+            name: billingDetails.name || customerName,
+            line1: billingDetails.address.line1,
+            line2: billingDetails.address.line2 || "",
+            city: billingDetails.address.city,
+            state: billingDetails.address.state || "",
+            postalCode: billingDetails.address.postal_code || "",
+            country: billingDetails.address.country || "",
+          };
+        }
+      } catch (error) {
+        console.error("Error retrieving payment intent:", error);
+      }
+    }
+
+    // Final determination - only set this to true if:
+    // 1. Our metadata says it's the same AND
+    // 2. User didn't enter different billing details in Stripe
+    const finalBillingAddressSameAsShipping =
+      billingIsSameAsShipping && !userEnteredDifferentBillingAddress;
+
+    console.log(
+      "Final billing same as shipping:",
+      finalBillingAddressSameAsShipping
+    );
+
+    // Create Sanity order with very explicit handling
+    const orderData: SanityOrderData = {
+      _type: "order",
+      orderNumber,
+      stripeCheckoutSessionId: id,
+      stripePaymentIntentId: payment_intent,
+      customerName,
+      stripeCustomerId: customer,
+      clerkUserId: clerkUserId,
+      email: customerEmail,
+      currency,
+      amountDiscount: total_details?.amount_discount
+        ? total_details.amount_discount / 100
+        : 0,
+      products: sanityProducts,
+      totalPrice: amount_total ? amount_total / 100 : 0,
+      status: "paid",
+      orderDate: new Date().toISOString(),
+      ...(shippingAddress && { shippingAddress }),
+      billingAddressSameAsShipping: finalBillingAddressSameAsShipping,
+    };
+
+    // ONLY add billingAddress if we're not using shipping address
+    if (!finalBillingAddressSameAsShipping && billingAddress) {
+      orderData.billingAddress = billingAddress;
+    }
+
+    const order = await backendClient.create(orderData);
+
+    return order;
+  } catch (error) {
+    console.error("Error in createOrderInSanity:", error);
+    throw error;
   }
-
-  // Final determination - only set this to true if:
-  // 1. Our metadata says it's the same AND
-  // 2. User didn't enter different billing details in Stripe
-  const finalBillingAddressSameAsShipping =
-    billingIsSameAsShipping && !userEnteredDifferentBillingAddress;
-
-  console.log(
-    "Final billing same as shipping:",
-    finalBillingAddressSameAsShipping
-  );
-
-  // Create Sanity order with very explicit handling
-  const orderData: SanityOrderData = {
-    _type: "order",
-    orderNumber,
-    stripeCheckoutSessionId: id,
-    stripePaymentIntentId: payment_intent,
-    customerName,
-    stripeCustomerId: customer,
-    clerkUserId: clerkUserId,
-    email: customerEmail,
-    currency,
-    amountDiscount: total_details?.amount_discount
-      ? total_details.amount_discount / 100
-      : 0,
-    products: sanityProducts,
-    totalPrice: amount_total ? amount_total / 100 : 0,
-    status: "paid",
-    orderDate: new Date().toISOString(),
-    ...(shippingAddress && { shippingAddress }),
-    billingAddressSameAsShipping: finalBillingAddressSameAsShipping,
-  };
-
-  // ONLY add billingAddress if we're not using shipping address
-  if (!finalBillingAddressSameAsShipping && billingAddress) {
-    orderData.billingAddress = billingAddress;
-  }
-
-  const order = await backendClient.create(orderData);
-
-  return order;
 }

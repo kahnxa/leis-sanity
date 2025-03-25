@@ -44,6 +44,9 @@ function SuccessPageContent() {
           <p className="text-lg text-gray-700 mb-4">
             Your order has been confirmed and will be shipped shortly.
           </p>
+          <p className="text-md text-gray-700 mb-4 italic">
+            Expected to arrive in 1-2 weeks.
+          </p>
           <div className="space-y-2">
             {orderNumber && (
               <p className="text-gray-600 items-center space-x-5">
