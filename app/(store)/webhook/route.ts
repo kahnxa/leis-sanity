@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { updateProductStock } from "@/actions/updateProductStock";
+import { sendOrderConfirmation } from "@/actions/sendOrderConfirmation";
 
 // Add these interfaces near the top of your file or in a separate types file
 interface StripeAddress {
@@ -117,6 +118,15 @@ export async function POST(req: NextRequest) {
       console.log("Order created in Sanity:", order._id);
       await updateProductStockForOrder(session, stripe);
       console.log("Product stock levels updated successfully");
+
+      // Add this code to send the email
+      console.log("Attempting to send confirmation email to:", order.email);
+      try {
+        const emailResult = await sendOrderConfirmation(order);
+        console.log("Email sending result:", emailResult);
+      } catch (emailError) {
+        console.error("Email sending failed with error:", emailError);
+      }
     } catch (error) {
       console.error("Error processing order:", error);
       return NextResponse.json(

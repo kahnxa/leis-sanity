@@ -1,30 +1,23 @@
 import { NextResponse } from "next/server";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import { resend } from "@/lib/resend";
 
 export async function GET() {
   try {
-    const result = await sendOrderConfirmationEmail(
-      "your-test-email@example.com", // Replace with your email
-      "TEST123",
-      [{ product: { name: "Test Product", price: 29.99 }, quantity: 1 }],
-      {
-        name: "Test User",
-        line1: "123 Test St",
-        line2: "",
-        city: "Test City",
-        state: "TX",
-        postalCode: "12345",
-        country: "US",
-      },
-      39.99
-    );
+    const { data, error } = await resend.emails.send({
+      from: "onboarding@resend.dev",
+      to: "xakkahn2001@gmail.com", // Your email for testing
+      subject: "Test Email",
+      text: "This is a test email to verify Resend is working",
+    });
 
-    return NextResponse.json({ success: true, result });
+    if (error) {
+      console.error("Test email error:", error);
+      return NextResponse.json({ error }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Test email failed:", error);
-    return NextResponse.json(
-      { success: false, error: String(error) },
-      { status: 500 }
-    );
+    console.error("Test email exception:", error);
+    return NextResponse.json({ error }, { status: 500 });
   }
 }
