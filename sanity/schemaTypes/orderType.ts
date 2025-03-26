@@ -72,6 +72,16 @@ export const orderType = defineType({
               title: "Quantity Purchased",
               type: "number",
             }),
+            defineField({
+              name: "name",
+              title: "Name",
+              type: "string",
+            }),
+            defineField({
+              name: "unitPrice",
+              title: "Unit Price",
+              type: "number",
+            }),
           ],
           preview: {
             select: {
@@ -228,6 +238,16 @@ export const orderType = defineType({
           validation: (Rule) => Rule.required(),
         }),
       ],
+    }),
+    defineField({
+      name: "shippingCost",
+      title: "Shipping Cost",
+      type: "number",
+    }),
+    defineField({
+      name: "taxAmount",
+      title: "Tax Amount",
+      type: "number",
     }),
   ],
   preview: {
