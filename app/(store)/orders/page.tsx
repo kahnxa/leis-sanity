@@ -27,71 +27,35 @@ async function Orders() {
         ) : (
           <div className="space-y-6 sm:space-y-8">
             {orders.map((order) => (
-              <div
-                key={order.orderNumber}
-                className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
-              >
-                <div className="p-4 sm:p-6 border-b border-gray-200">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-4">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1 font-bold">
-                        Order Number
-                      </p>
-                      <p className="font-mono text-sm text-green-600 break-all">
-                        {order.orderNumber}
-                      </p>
-                    </div>
-                    <div className="sm:text-right">
-                      <p className="text-sm text-gray-600 mb-1">Order Date</p>
-                      <p className="font-medium">
-                        {order.orderDate
-                          ? new Date(order.orderDate).toLocaleDateString()
-                          : "N/A"}
-                      </p>
-                    </div>
+              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500">
+                      Order #
+                    </h3>
+                    <p className="text-md font-mono">{order.orderNumber}</p>
                   </div>
-
-                  <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
-                    <div className="flex items-center">
-                      <span className="text-sm mr-2">Status</span>
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm ${
-                          order.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {order.status}
-                      </span>
-                    </div>
-                    <div className="sm:text-right">
-                      <p className="text-sm text-gray-600 mb-1">Total Amount</p>
-                      <p className="font-bold text-lg">
-                        {formatCurrency(order.totalPrice ?? 0, order.currency)}
-                      </p>
-                    </div>
+                  <div className="text-right">
+                    <span className="text-sm text-gray-500">
+                      {order.orderDate
+                        ? new Date(order.orderDate).toLocaleDateString()
+                        : "No date"}
+                    </span>
+                    <span
+                      className={`ml-3 px-3 py-1 rounded-full text-xs font-medium capitalize inline-block ${
+                        order.status === "paid"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
                   </div>
-
-                  {order.amountDiscount ? (
-                    <div className="mt-4 p-3 sm:p-4 bg-red-50 rounded-lg">
-                      <p className="text-red-600 fontt-medium mb-1 text-sm sm:text-base">
-                        Discount Applied:{" "}
-                        {formatCurrency(order.amountDiscount, order.currency)}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Original Subtotal:{" "}
-                        {formatCurrency(
-                          (order.totalPrice ?? 0) + order.amountDiscount,
-                          order.currency
-                        )}
-                      </p>
-                    </div>
-                  ) : null}
                 </div>
                 <div className="px-4 py-3 sm:px-6 sm:py-4">
-                  <p className="text-sm font-semibold text-gray-600 mb-3 sm:mb-4">
+                  <h2 className="text-sm font-semibold text-gray-600 mb-3 sm:mb-4">
                     Order Items
-                  </p>
+                  </h2>
 
                   <div className="space-y-3 sm:space-y-4">
                     {order.products?.map((product) => (
@@ -99,63 +63,69 @@ async function Orders() {
                         key={product.product?._id}
                         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-2 border-b last:border-b-0"
                       >
-                        <div className="flex items-center gap-3 sm:gap-4">
-                          {product.product?.image && (
-                            <div className="relative h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 rounded-md overflow-hidden">
-                              <Image
-                                src={imageUrl(product.product.image).url()}
-                                alt={product.product?.name ?? ""}
-                                className="object-cover"
-                                fill
-                              />
+                        <div className="flex items-start justify-between w-full">
+                          <div className="flex items-center">
+                            {product.product?.image && (
+                              <div className="relative h-14 w-14 sm:h-16 sm:w-16 flex-shrink-0 rounded-md overflow-hidden mr-3">
+                                <Image
+                                  src={imageUrl(product.product.image).url()}
+                                  alt={product.product?.name ?? ""}
+                                  className="object-cover"
+                                  fill
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <p className="font-medium text-sm sm:text-base">
+                                {product.product?.name}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Quantity: {product.quantity ?? "N/A"}
+                              </p>
                             </div>
-                          )}
-                          <div>
-                            <p className="font-medium text-sm sm:text-base">
-                              {product.product?.name}
+                          </div>
+
+                          <div className="flex flex-col items-end">
+                            <p className="font-medium text-gray-700">
+                              {product.product?.price && product.quantity
+                                ? formatCurrency(
+                                    product.product.price * product.quantity,
+                                    order.currency
+                                  )
+                                : "N/A"}
                             </p>
-                            <p className="text-sm text-gray-600">
-                              Quantity: {product.quantity ?? "N/A"}
-                            </p>
+
+                            {(order.shippingCost ?? 0) > 0 && (
+                              <span className="text-sm text-gray-500">
+                                + Shipping:{" "}
+                                {formatCurrency(
+                                  order.shippingCost ?? 0,
+                                  order.currency
+                                )}
+                              </span>
+                            )}
+
+                            {(order.taxAmount ?? 0) > 0 && (
+                              <span className="text-sm text-gray-500">
+                                + Tax:{" "}
+                                {formatCurrency(
+                                  order.taxAmount ?? 0,
+                                  order.currency
+                                )}
+                              </span>
+                            )}
+
+                            <div className="mt-3 pt-2 border-t border-gray-200 w-full text-right">
+                              <span className="text-lg font-bold text-blue-600">
+                                Total:{" "}
+                                {formatCurrency(
+                                  order.totalPrice ?? 0,
+                                  order.currency
+                                )}
+                              </span>
+                            </div>
                           </div>
                         </div>
-
-                        <p className="font-medium text-right">
-                          {product.product?.price && product.quantity ? (
-                            <>
-                              {formatCurrency(
-                                product.product.price * product.quantity,
-                                order.currency
-                              )}
-                              {order.shippingCost && (
-                                <span
-                                  key="shipping"
-                                  className="block text-sm text-gray-600"
-                                >
-                                  + Shipping:{" "}
-                                  {formatCurrency(
-                                    order.shippingCost,
-                                    order.currency
-                                  )}
-                                </span>
-                              )}
-                              {order.taxAmount && (
-                                <span
-                                  key="tax"
-                                  className="block text-sm text-gray-600"
-                                >
-                                  + Tax:{" "}
-                                  {formatCurrency(
-                                    order.taxAmount,
-                                    order.currency
-                                  )}
-                                </span>
-                              )}
-                            </>
-                          ) : (
-                            "N/A"
-                          )}
-                        </p>
                       </div>
                     ))}
                   </div>
