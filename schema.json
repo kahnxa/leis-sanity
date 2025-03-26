@@ -545,6 +545,20 @@
                   "type": "number"
                 },
                 "optional": true
+              },
+              "name": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "string"
+                },
+                "optional": true
+              },
+              "unitPrice": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "number"
+                },
+                "optional": true
               }
             },
             "rest": {
@@ -732,6 +746,20 @@
               "optional": true
             }
           }
+        },
+        "optional": true
+      },
+      "shippingCost": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
+      "taxAmount": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
         },
         "optional": true
       }

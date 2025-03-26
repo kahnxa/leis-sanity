@@ -121,12 +121,40 @@ async function Orders() {
                         </div>
 
                         <p className="font-medium text-right">
-                          {product.product?.price && product.quantity
-                            ? formatCurrency(
+                          {product.product?.price && product.quantity ? (
+                            <>
+                              {formatCurrency(
                                 product.product.price * product.quantity,
                                 order.currency
-                              )
-                            : "N/A"}
+                              )}
+                              {order.shippingCost && (
+                                <span
+                                  key="shipping"
+                                  className="block text-sm text-gray-600"
+                                >
+                                  + Shipping:{" "}
+                                  {formatCurrency(
+                                    order.shippingCost,
+                                    order.currency
+                                  )}
+                                </span>
+                              )}
+                              {order.taxAmount && (
+                                <span
+                                  key="tax"
+                                  className="block text-sm text-gray-600"
+                                >
+                                  + Tax:{" "}
+                                  {formatCurrency(
+                                    order.taxAmount,
+                                    order.currency
+                                  )}
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            "N/A"
+                          )}
                         </p>
                       </div>
                     ))}

@@ -105,6 +105,8 @@ export type Order = {
       [internalGroqTypeReferenceTo]?: "product";
     };
     quantity?: number;
+    name?: string;
+    unitPrice?: number;
     _key: string;
   }>;
   totalPrice?: number;
@@ -130,6 +132,8 @@ export type Order = {
     postalCode?: string;
     country?: string;
   };
+  shippingCost?: number;
+  taxAmount?: number;
 };
 
 export type Product = {
@@ -377,6 +381,8 @@ export type MY_ORDERS_QUERYResult = Array<{
       stock?: number;
     } | null;
     quantity?: number;
+    name?: string;
+    unitPrice?: number;
     _key: string;
   }> | null;
   totalPrice?: number;
@@ -402,6 +408,8 @@ export type MY_ORDERS_QUERYResult = Array<{
     postalCode?: string;
     country?: string;
   };
+  shippingCost?: number;
+  taxAmount?: number;
 }>;
 
 // Source: ./sanity/lib/products/getAllCategories.ts
