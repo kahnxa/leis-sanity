@@ -7,11 +7,30 @@ if (!API_KEY) {
 
 const resend = new Resend(API_KEY);
 
+// Define proper interfaces instead of using 'any'
+interface OrderItem {
+  product?: {
+    name?: string;
+    price?: number;
+  };
+  quantity: number;
+}
+
+interface ShippingAddress {
+  name: string;
+  line1: string;
+  line2?: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  country: string;
+}
+
 export async function sendOrderConfirmationEmail(
   email: string,
   orderNumber: string,
-  orderItems: any[],
-  shippingAddress: any,
+  orderItems: OrderItem[], // Use the interface instead of any[]
+  shippingAddress: ShippingAddress, // Use the interface instead of any
   totalAmount: number
 ) {
   try {
@@ -38,7 +57,7 @@ export async function sendOrderConfirmationEmail(
               <tr>
                 <td style="padding: 10px; border: 1px solid #e5e7eb;">${item.product?.name || "Product"}</td>
                 <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb;">${item.quantity}</td>
-                <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb;">$${(item.product?.price * item.quantity).toFixed(2)}</td>
+                <td style="text-align: right; padding: 10px; border: 1px solid #e5e7eb;">$${((item.product?.price || 0) * item.quantity).toFixed(2)}</td>
               </tr>
             `
               )

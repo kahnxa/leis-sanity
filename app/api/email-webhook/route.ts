@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     }
 
     // If orderNumber is provided, find that specific order
-    let orderToEmail = orderNumber
+    const orderToEmail = orderNumber
       ? orders.find((order) => order.orderNumber === orderNumber)
       : orders[0]; // Otherwise use the most recent order
 
