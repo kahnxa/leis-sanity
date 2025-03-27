@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 565.7 565.7">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #fff;
+        font-family: HelveticaNeue-Medium, 'Helvetica Neue';
+        font-size: 310.44px;
+        font-weight: 500;
+      }
+
+      .cls-1, .cls-2 {
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        fill: #27aae1;
+      }
+    </style>
+  </defs>
+  <circle class="cls-3" cx="282.85" cy="282.85" r="282.85"/>
+  <g class="cls-2">
+    <g class="cls-2">
+      <g class="cls-2">
+        <g class="cls-2">
+          <g class="cls-2">
+            <g class="cls-2">
+              <g class="cls-2">
+                <text class="cls-1" transform="translate(41.18 378.96)"><tspan x="0" y="0">leis</tspan></text>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

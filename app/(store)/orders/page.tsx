@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { imageUrl } from "@/lib/imageUrl";
 
-async function Orders() {
+export default async function Orders() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -27,7 +27,10 @@ async function Orders() {
         ) : (
           <div className="space-y-6 sm:space-y-8">
             {orders.map((order) => (
-              <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+              <div
+                key={order.orderNumber}
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden"
+              >
                 <div className="px-5 py-4 bg-gray-50 border-b border-gray-100 flex justify-between items-center">
                   <div>
                     <h3 className="text-sm font-medium text-gray-500">
@@ -58,9 +61,13 @@ async function Orders() {
                   </h2>
 
                   <div className="space-y-3 sm:space-y-4">
-                    {order.products?.map((product) => (
+                    {order.products?.map((product, index) => (
                       <div
-                        key={product.product?._id}
+                        key={
+                          product.product?._id ||
+                          product._key ||
+                          `product-${index}`
+                        }
                         className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-2 border-b last:border-b-0"
                       >
                         <div className="flex items-start justify-between w-full">
@@ -166,5 +173,3 @@ async function Orders() {
     </div>
   );
 }
-
-export default Orders;
