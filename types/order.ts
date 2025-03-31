@@ -4,6 +4,8 @@ export interface OrderItem {
     price?: number;
   };
   quantity: number;
+  name?: string;
+  unitPrice?: number;
 }
 
 export interface ShippingAddress {

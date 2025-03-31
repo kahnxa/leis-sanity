@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { updateProductStock } from "@/actions/updateProductStock";
 import { sendOrderConfirmation } from "@/actions/sendOrderConfirmation";
+import { sendAdminOrderNotification } from "@/actions/sendAdminOrderNotification";
 
 // Add these interfaces near the top of your file or in a separate types file
 interface StripeAddress {
@@ -126,6 +127,15 @@ export async function POST(req: NextRequest) {
         console.log("Email sending result:", emailResult);
       } catch (emailError) {
         console.error("Email sending failed with error:", emailError);
+      }
+
+      // Send notification email to admin
+      console.log("Sending admin notification email");
+      try {
+        const adminEmailResult = await sendAdminOrderNotification(order);
+        console.log("Admin notification result:", adminEmailResult);
+      } catch (adminEmailError) {
+        console.error("Admin notification failed with error:", adminEmailError);
       }
     } catch (error) {
       console.error("Error processing order:", error);
